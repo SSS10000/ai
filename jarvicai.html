@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>JARVIC AI</title>
+  <script type="text/javascript" src="/eel.js"></script>
+  <link rel="icon" href="favicon.ico" />
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      height: 100vh;
+      background: url('AI.gif') no-repeat center center/cover;
+      font-family: 'Roboto', sans-serif;
+      color: #00bfff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      background-size: cover;
+      background-position: center;
+    }
+
+    .border {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      border: 8px solid #00bfff;
+      box-shadow: 0 0 20px rgba(0,191,255,0.8);
+      animation: pulse 2s infinite alternate;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 20px rgba(0,191,255,0.8); }
+      100% { box-shadow: 0 0 40px rgba(0,191,255,1); }
+    }
+
+
+    .command-container {
+      position: fixed;
+      bottom: 40px;
+      right: 40px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      z-index: 10;
+      transition: all 0.3s ease-in-out;
+    }
+
+    .mic-button {
+      background: #fff;
+      border-radius: 50%;
+      border: 3px solid #00bfff;
+      width: 80px;
+      height: 80px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 0 10px #00bfff, 0 0 5px #00bfff inset;
+      cursor: pointer;
+      transition: all 0.3s ease-in-out;
+      animation: bounce 1.5s infinite alternate;
+    }
+
+    .mic-button:hover {
+      transform: scale(1.1);
+      box-shadow: 0 0 20px #00d4ff, 0 0 8px #00d4ff inset;
+    }
+
+   @keyframes bounce {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-10px); }
+    }
+
+    .mic-button img {
+      width: 50px;
+      height: 50px;
+    }
+    #textCommand {
+      padding: 12px 18px;
+      font-size: 1.2rem;
+      border-radius: 15px;
+      border: 2px solid #00bfff;
+      background: rgba(0, 191, 255, 0.1);
+      color: #00bfff;
+      width: 250px;
+      font-family: 'Courier New', Courier, monospace;
+      outline: none;
+      box-shadow: 0 0 15px #00bfff;
+      backdrop-filter: blur(8px);
+      transition: all 0.3s ease-in-out;
+    }
+    #textCommand:focus {
+      box-shadow: 0 0 25px #00d4ff;
+    }
+    #transcript {
+      position: fixed;
+      bottom: 120px;
+      left: 20px;
+      max-width: 320px;
+      background: rgba(0, 191, 255, 0.2);
+      padding: 16px;
+      border-radius: 15px;
+      font-size: 1rem;
+      color: #00bfff;
+      box-shadow: 0 0 15px #00bfff;
+      font-family: 'Courier New', Courier, monospace;
+      backdrop-filter: blur(8px);
+      z-index: 20;
+      white-space: pre-wrap;
+      user-select: none;
+      animation: glow 3s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      0% { box-shadow: 0 0 10px #00bfff; }
+      100% { box-shadow: 0 0 25px #00d4ff; }
+    }
+
+    /* System Stats Box */
+    #system-stats {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 280px;
+      background: rgba(0, 191, 255, 0.1);
+      border: 2px solid #00bfff;
+      border-radius: 15px;
+      padding: 18px;
+      color: #00bfff;
+      font-size: 1rem;
+      line-height: 1.6;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 0 15px #00bfff;
+      font-family: 'Courier New', Courier, monospace;
+      z-index: 20;
+      animation: fadeIn 2s ease-out;
+    }
+
+    /* Fade-in Animation for System Stats */
+    @keyframes fadeIn {
+      0% { opacity: 0; }
+      100% { opacity: 1; }
+    }
+
+    /* Time and Battery Status Update */
+    .stat-value {
+      font-weight: bold;
+      color: #00d4ff;
+    }
+
+    /* Small Screen (Mobile View) adjustments */
+    @media (max-width: 600px) {
+      .command-container {
+        bottom: 20px;
+        right: 20px;
+      }
+      #textCommand {
+        width: 180px;
+        font-size: 1rem;
+      }
+      #system-stats {
+        width: 220px;
+        font-size: 0.9rem;
+        padding: 12px;
+      }
+      .mic-button {
+        width: 60px;
+        height: 60px;
+      }
+    }
+    #login-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.9);
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-box {
+  background: #111;
+  padding: 40px;
+  border-radius: 15px;
+  box-shadow: 0 0 20px #00bfff;
+  text-align: center;
+  color: #00d4ff;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.login-box input {
+  padding: 12px;
+  margin-top: 20px;
+  width: 100%;
+  border-radius: 10px;
+  border: 2px solid #00bfff;
+  background: #000;
+  color: #00d4ff;
+  font-size: 1rem;
+  outline: none;
+}
+
+.login-box button {
+  margin-top: 20px;
+  padding: 10px 25px;
+  background: #00bfff;
+  border: none;
+  border-radius: 10px;
+  font-weight: bold;
+  color: #000;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.login-box button:hover {
+  background: #00d4ff;
+}
+
+#login-error {
+  margin-top: 10px;
+  color: red;
+  font-size: 0.9rem;
+}
+
+  </style>
+</head>
+<body>
+</script>
+
+<!-- Login Overlay -->
+<div id="login-overlay">
+  <div class="login-box">
+    <h2>Secure Login AcCess AI </h2>
+    <input type="password" id="password" placeholder="Enter Password" />
+    <button onclick="validatePassword()">Login</button>
+    <div id="login-error"></div>
+  </div>
+</div>
+
+<!-- Main App Content (Initially hidden) -->
+<div id="main-app" style="display:none;">
+
+  <div class="border"></div>
+
+  <!-- Command Input + Mic -->
+  <div class="command-container">
+    <input type="text" id="textCommand" placeholder="Type your command..." />
+    <button class="mic-button" id="micBtn">
+      <img src="https://i.ibb.co/844rRwZX/44b85d6c7eb3ead058debf67d9a337d3-removebg-preview.png" alt="Mic Icon" />
+    </button>
+  </div>
+
+  <!-- Transcript / Assistant Response -->
+  <div id="transcript">Click mic or type command...</div>
+
+  <!-- System Stats Display -->
+  <div id="system-stats">
+    <div><strong>CPU Usage:</strong> <span id="cpu" class="stat-value">0%</span></div>
+    <div><strong>RAM Usage:</strong> <span id="ram" class="stat-value">0 MB</span></div>
+    <div><strong>Storage:</strong> <span id="disk" class="stat-value">0 GB</span></div>
+    <div><strong>Date & Time:</strong> <span id="datetime" class="stat-value">--</span></div>
+    <div><strong>Battery:</strong> <span id="battery" class="stat-value">--%</span></div>
+  </div>
+
+</div> <!-- End of #main-app -->
+
+<script>
+  // Handle Login Password
+  function validatePassword() {
+    const input = document.getElementById("password").value;
+    const correct = "EDUCATION-100%sss";
+    if (input === correct) {
+      document.getElementById("login-overlay").style.display = "none";
+      document.getElementById("main-app").style.display = "block";
+      eel.start_listening_threaded();  // Start listening on successful login
+    } else {
+      document.getElementById("login-error").innerText = "Incorrect password. Try again.";
+    }
+  }
+</script>
+
+<script>
+  // Expose to Python
+  eel.expose(updateSystemStats);
+  function updateSystemStats(stats) {
+    if (!stats) return;
+    document.getElementById("cpu").innerText = stats.cpu + "%";
+    document.getElementById("ram").innerText = `${stats.ram_used} / ${stats.ram_total} MB`;
+    document.getElementById("disk").innerText = `${stats.disk_used} / ${stats.disk_total} GB`;
+    document.getElementById("datetime").innerText = stats.date_time;
+    document.getElementById("battery").innerText = stats.battery !== "N/A" ? stats.battery + "%" : "Battery info not available";
+  }
+
+  eel.expose(showTranscript);
+  function showTranscript(text) {
+    document.getElementById("transcript").innerText = text;
+  }
+
+  // Event Bindings after DOM is ready
+  document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("micBtn").addEventListener("click", () => {
+      eel.start_listening_threaded();
+    });
+
+    document.getElementById("textCommand").addEventListener("keydown", (event) => {
+      if (event.key === "Enter") {
+        const cmd = event.target.value.trim();
+        if (cmd.length > 0) eel.process_text_command(cmd);
+        event.target.value = "";
+      }
+    });
+  });
+</script>
+</body>
+</html>
